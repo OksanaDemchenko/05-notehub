@@ -1,22 +1,24 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import css from './NoteForm.module.css';
-import type { Note } from '../../types/note';
+import type { CreateNotePayload } from '../../services/noteService';
 
 interface NoteFormProps {
-  onSubmit: (note: Omit<Note, 'id'>) => void;
+  onSubmit: (note: CreateNotePayload) => void;
   onCancel: () => void;
 }
 
 const validationSchema = Yup.object({
   title: Yup.string().min(3).max(50).required('Required'),
   content: Yup.string().max(500, 'Max 500 characters'),
-  tag: Yup.string().oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping']).required('Required'),
+  tag: Yup.string()
+    .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'])
+    .required('Required'),
 });
 
 export default function NoteForm({ onSubmit, onCancel }: NoteFormProps) {
   return (
-    <Formik
+    <Formik<CreateNotePayload>
       initialValues={{ title: '', content: '', tag: 'Todo' }}
       validationSchema={validationSchema}
       onSubmit={(values, { resetForm }) => {
@@ -34,7 +36,13 @@ export default function NoteForm({ onSubmit, onCancel }: NoteFormProps) {
 
           <div className={css.formGroup}>
             <label htmlFor="content">Content</label>
-            <Field id="content" name="content" as="textarea" rows={8} className={css.textarea} />
+            <Field
+              id="content"
+              name="content"
+              as="textarea"
+              rows={8}
+              className={css.textarea}
+            />
             <ErrorMessage name="content" component="span" className={css.error} />
           </div>
 
@@ -51,10 +59,18 @@ export default function NoteForm({ onSubmit, onCancel }: NoteFormProps) {
           </div>
 
           <div className={css.actions}>
-            <button type="button" className={css.cancelButton} onClick={onCancel}>
+            <button
+              type="button"
+              className={css.cancelButton}
+              onClick={onCancel}
+            >
               Cancel
             </button>
-            <button type="submit" className={css.submitButton} disabled={isSubmitting}>
+            <button
+              type="submit"
+              className={css.submitButton}
+              disabled={isSubmitting}
+            >
               Create note
             </button>
           </div>
