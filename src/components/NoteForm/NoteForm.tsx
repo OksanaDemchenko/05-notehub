@@ -1,10 +1,13 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
 import css from './NoteForm.module.css';
+import { createNote } from '../../services/noteService';
 import type { CreateNotePayload } from '../../services/noteService';
+import type { Note } from '../../types/note'; // <-- додано імпорт Note
 
 interface NoteFormProps {
-  onSubmit: (note: CreateNotePayload) => void;
   onCancel: () => void;
 }
 
@@ -16,15 +19,26 @@ const validationSchema = Yup.object({
     .required('Required'),
 });
 
-export default function NoteForm({ onSubmit, onCancel }: NoteFormProps) {
+export default function NoteForm({ onCancel }: NoteFormProps) {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation<Note, Error, CreateNotePayload>({ // <-- зміни тут: додано Generic типи
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      onCancel();
+    },
+  });
+
   return (
     <Formik<CreateNotePayload>
       initialValues={{ title: '', content: '', tag: 'Todo' }}
       validationSchema={validationSchema}
       onSubmit={(values, { resetForm }) => {
-        onSubmit(values);
-        resetForm();
-      }}
+  mutation.mutate(values, {
+    onSuccess: () => resetForm(), //очистити форму лише після успішного створення нотатки
+  });
+}}
     >
       {({ isSubmitting }) => (
         <Form className={css.form}>
@@ -43,7 +57,11 @@ export default function NoteForm({ onSubmit, onCancel }: NoteFormProps) {
               rows={8}
               className={css.textarea}
             />
-            <ErrorMessage name="content" component="span" className={css.error} />
+            <ErrorMessage
+              name="content"
+              component="span"
+              className={css.error}
+            />
           </div>
 
           <div className={css.formGroup}>
@@ -69,7 +87,7 @@ export default function NoteForm({ onSubmit, onCancel }: NoteFormProps) {
             <button
               type="submit"
               className={css.submitButton}
-              disabled={isSubmitting}
+              disabled={isSubmitting || mutation.status === 'pending'} // <-- без змін, працює
             >
               Create note
             </button>

@@ -1,13 +1,10 @@
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery} from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
 
 import {
   fetchNotes,
-  createNote,
-  deleteNote,
   type FetchNotesResponse,
-  type CreateNotePayload,
 } from '../../services/noteService';
 
 import SearchBox from '../SearchBox/SearchBox';
@@ -26,7 +23,7 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [debouncedSearch] = useDebounce(search, 500);
-  const queryClient = useQueryClient();
+ 
 
   const { data, isLoading, isError } = useQuery<FetchNotesResponse>({
     queryKey: ['notes', page, debouncedSearch],
@@ -42,21 +39,17 @@ export default function App() {
   const notes = data?.notes ?? [];
   const totalPages = data?.totalPages ?? 0;
 
-  const handleCreateNote = async (noteData: CreateNotePayload) => {
-    await createNote(noteData);
-    setIsModalOpen(false);
-    queryClient.invalidateQueries({ queryKey: ['notes'] });
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
   };
 
-  const handleDeleteNote = async (id: string) => {
-    await deleteNote(id);
-    queryClient.invalidateQueries({ queryKey: ['notes'] });
-  };
 
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
-        <SearchBox value={search} onChange={setSearch} />
+        <SearchBox value={search} onChange={handleSearchChange} />
 
         {totalPages > 1 && (
           <Pagination
@@ -73,17 +66,13 @@ export default function App() {
 
       {isLoading && <p>Loading...</p>}
       {isError && <p>Error loading notes</p>}
+      {!isLoading && notes.length === 0 && <p>No notes found</p>}
 
-      {notes.length > 0 && (
-        <NoteList notes={notes} onDelete={handleDeleteNote} />
-      )}
+      {notes.length > 0 && <NoteList notes={notes} />}
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
-          <NoteForm
-            onSubmit={handleCreateNote}
-            onCancel={() => setIsModalOpen(false)}
-          />
+          <NoteForm onCancel={() => setIsModalOpen(false)} />
         </Modal>
       )}
     </div>
