@@ -16,7 +16,6 @@ export default function Modal({ children, onClose }: ModalProps) {
       }
     };
 
-    // 🔒 блокуємо скрол
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
@@ -24,7 +23,6 @@ export default function Modal({ children, onClose }: ModalProps) {
 
     return () => {
       window.removeEventListener('keydown', handleEsc);
-      // 🔓 повертаємо скрол
       document.body.style.overflow = originalOverflow;
     };
   }, [onClose]);

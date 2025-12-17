@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import css from './NoteForm.module.css';
 import { createNote } from '../../services/noteService';
 import type { CreateNotePayload } from '../../services/noteService';
-import type { Note } from '../../types/note'; // <-- додано імпорт Note
+import type { Note } from '../../types/note';
 
 interface NoteFormProps {
   onCancel: () => void;
@@ -22,7 +22,7 @@ const validationSchema = Yup.object({
 export default function NoteForm({ onCancel }: NoteFormProps) {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation<Note, Error, CreateNotePayload>({ // <-- зміни тут: додано Generic типи
+  const mutation = useMutation<Note, Error, CreateNotePayload>({ 
     mutationFn: createNote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
@@ -36,7 +36,7 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
       validationSchema={validationSchema}
       onSubmit={(values, { resetForm }) => {
   mutation.mutate(values, {
-    onSuccess: () => resetForm(), //очистити форму лише після успішного створення нотатки
+    onSuccess: () => resetForm(), 
   });
 }}
     >
@@ -87,7 +87,7 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
             <button
               type="submit"
               className={css.submitButton}
-              disabled={isSubmitting || mutation.status === 'pending'} // <-- без змін, працює
+              disabled={isSubmitting || mutation.status === 'pending'} 
             >
               Create note
             </button>

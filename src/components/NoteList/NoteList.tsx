@@ -12,11 +12,9 @@ interface NoteListProps {
 export default function NoteList({ notes }: NoteListProps) {
   const queryClient = useQueryClient();
 
-  // 🔹 Додано Generic типи для мутації
   const deleteMutation = useMutation<Note, Error, string>({
     mutationFn: deleteNote,
     onSuccess: () => {
-      // 🔹 Інвалідуємо кеш після видалення нотатки
       queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
   });
@@ -33,7 +31,7 @@ export default function NoteList({ notes }: NoteListProps) {
             <button
               className={css.button}
               onClick={() => deleteMutation.mutate(note.id)}
-              disabled={deleteMutation.status === 'pending'} // 🔹 залишаємо status для блокування кнопки
+              disabled={deleteMutation.status === 'pending'} 
             >
               Delete
             </button>
