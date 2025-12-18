@@ -34,10 +34,8 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
     <Formik<CreateNotePayload>
       initialValues={{ title: '', content: '', tag: 'Todo' }}
       validationSchema={validationSchema}
-      onSubmit={(values, { resetForm }) => {
-  mutation.mutate(values, {
-    onSuccess: () => resetForm(), 
-  });
+      onSubmit={(values) => {
+  mutation.mutate(values);
 }}
     >
       {({ isSubmitting }) => (
